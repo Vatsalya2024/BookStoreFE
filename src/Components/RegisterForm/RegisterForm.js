@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import "./LoginForm.css";
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
+import "./RegisterForm.css"; // Import the CSS file
 
-function LoginForm() {
+function RegisterForm() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -14,11 +14,12 @@ function LoginForm() {
     const requestBody = {
       username: username,
       password: password,
+      email: email,
       role: "user",
     };
 
     try {
-      const response = await fetch("https://localhost:7246/api/User/Login", {
+      const response = await fetch("https://localhost:7246/api/User/Register", {
         method: "POST",
         headers: {
           accept: "text/plain",
@@ -29,45 +30,16 @@ function LoginForm() {
 
       if (response.ok) {
         const responseBody = await response.json();
-        console.log("Login response:", responseBody); // Log the response
-
         if (
           responseBody.username === username &&
           responseBody.role === "user"
         ) {
-          setMessage("Login successful");
-          sessionStorage.setItem("token", responseBody.token);
-          sessionStorage.setItem("username", responseBody.username);
-
-          // Fetch all users to get the userId
-          const usersResponse = await fetch("https://localhost:7246/api/User", {
-            method: "GET",
-            headers: {
-              accept: "text/plain",
-              Authorization: `Bearer ${responseBody.token}`,
-            },
-          });
-
-          if (usersResponse.ok) {
-            const users = await usersResponse.json();
-            const loggedInUser = users.find(
-              (user) => user.username === responseBody.username
-            );
-
-            if (loggedInUser) {
-              sessionStorage.setItem("userId", loggedInUser.userId); // Store userId
-              navigate("/profile");
-            } else {
-              setMessage("User not found");
-            }
-          } else {
-            setMessage("Failed to fetch users");
-          }
+          setMessage("Registration successful");
         } else {
-          setMessage("Login failed");
+          setMessage("Registration failed");
         }
       } else {
-        setMessage("Login failed");
+        setMessage("Registration failed");
       }
     } catch (error) {
       setMessage("An error occurred");
@@ -75,7 +47,7 @@ function LoginForm() {
   };
 
   return (
-    <div className="login-container">
+    <div className="register-container">
       <div className="left">
         <h1>Welcome Reader!</h1>
         <p>
@@ -83,7 +55,7 @@ function LoginForm() {
         </p>
       </div>
       <div className="right">
-        <h2>BOOKSTORE</h2>
+        <h2>Register</h2>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label htmlFor="username">Username</label>
@@ -93,6 +65,17 @@ function LoginForm() {
               name="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className="input-group">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -107,15 +90,13 @@ function LoginForm() {
               required
             />
           </div>
-          <div className="forgot-password">
-            <a href="/forgot-password">Forgot Password?</a>
-          </div>
           <div className="buttons">
-            <Link to="/register" className="register-btn">
-              Register
-            </Link>
-            <button type="submit" className="login-btn">
+            <Link to="/login" className="login-btn">
               Login
+            </Link>{" "}
+            {/* Add link to login page */}
+            <button type="submit" className="register-btn">
+              Register
             </button>
           </div>
         </form>
@@ -125,4 +106,4 @@ function LoginForm() {
   );
 }
 
-export default LoginForm;
+export default RegisterForm;
